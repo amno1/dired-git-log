@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2018-2019  Free Software Foundation, Inc.
 
-;; Author: Clemens Radermacher <clemera@posteo.net>
 ;; Author: Arthur Miller <arthur.miller@live.com>
+;; Author: Clemens Radermacher <clemera@posteo.net>
 ;; URL: https://github.com/amno1/dired-git-log
 ;; Version: 1.0.0
 ;; Package-Requires: ((emacs "25"))
