@@ -1,0 +1,60 @@
+[[https://melpa.org/packages/dired-auto-readme-badge.svg]]
+[[https://img.shields.io/badge/License-GPLv3-blue.svg]]
+
+* Dired Git Log
+
+Display git information inside a dired buffer:
+
+[[./images/screenshot.png]]
+
+This started as a fork of Clemera's [[dired-git-info][https://github.com/clemera/dired-git-log]],
+because I needed a version without overlayes, that works with my
+dired-auto-readme and mode dired-hacks. It is now totally reworked to use text
+properties as well as how it works internally. I would also like to
+turn it into async (non-blocking) version, but it is not implemented yet.
+
+* Installation
+  
+  This is not yet in either Elpa nor Melpa, so currently you will have to
+  install it manually.
+
+** Manual
+
+For manual installation, clone the repository and call:
+
+#+BEGIN_SRC elisp
+(package-install-file "/path/to/dired-git-log.el")
+#+END_SRC
+
+* Config
+
+** Bind the minor mode command in dired
+
+#+BEGIN_SRC elisp
+(with-eval-after-load 'dired
+  (define-key dired-mode-map ")" 'dired-git-log-mode))
+#+END_SRC
+
+** Don't hide normal Dired file info
+
+By default, toggling =dired-git-log-mode= also toggles the built-in
+=dired-hide-details-mode=, which hides file details such as ownership,
+permissions and size. This behaviour can be disabled by overriding
+=dgi-auto-hide-details-p=:
+
+#+BEGIN_SRC elisp
+(setq dired-git-log-auto-hide-details-p nil)
+#+END_SRC
+
+** Enable automatically in every Dired buffer (if in Git repository)
+
+To enable =dired-git-info-mode= whenever you navigate to a Git repository, use
+the following:
+#+BEGIN_SRC elisp
+(add-hook 'dired-after-readin-hook 'dired-git-log-auto-enable)
+#+END_SRC
+
+* License
+
+GPL v3. For details, see the attached [[file:LICENSE][license file]].
+
