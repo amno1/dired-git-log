@@ -25,14 +25,14 @@
 ;;; Commentary:
 ;;
 ;; Minor mode which shows last commit message and date (info shown is
-;; configurable) for git project files in dired.
+;; configurable) for git project files in Dired.
 ;;
 ;;; Code:
 
 (require 'dired)
 
 (defgroup dired-git-log nil
-  "Show git info in dired."
+  "Show git info in Dired."
   :group 'files
   :prefix "dired-git-log-")
 
@@ -50,7 +50,7 @@ info."
 (defcustom dired-git-log-commit-message-format "%s\t%cr"
   "Format of the commit messages.
 
-Entries separated by tabs are aligned. Some common placeholders
+Entries separated by tabs are aligned.  Some common placeholders
 are (see git-log PRETTY FORMATS for all):
 
            · %H: commit hash
@@ -93,6 +93,7 @@ are (see git-log PRETTY FORMATS for all):
       (nreverse files))))
 
 (defun dired-git-log--get-log ()
+  "Insert git log messages into current buffer."
   (let* ((files (dired-git-log--files))
          (msgs (dired-git-log--spacers files))
          (cols (dired-git-log--get-columns)))
@@ -124,6 +125,7 @@ are (see git-log PRETTY FORMATS for all):
     (nreverse spacers)))
 
 (defun dired-git-log--longest-line (lines)
+  "Find longest line length in a list of LINES."
   (let ((longest 0) length)
     (dolist (l lines)
       (setq length (length l))
@@ -146,7 +148,7 @@ are (see git-log PRETTY FORMATS for all):
     (nreverse logs)))
 
 (defun dired-git-log--remove-logs ()
-  "Renove inserted git log messages."  
+  "Renove inserted git log messages."
   (save-excursion
     (with-silent-modifications
       (goto-char 1)
