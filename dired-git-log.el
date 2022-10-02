@@ -81,11 +81,11 @@ are (see git-log PRETTY FORMATS for all):
            · %f: sanitized subject line, suitable for a filename"
   :type 'string)
 
-(defvar dired-git-log--restore-no-details nil
+(defvar-local dired-git-log--restore-no-details nil
   "If no details view has to be restored.")
 
 (defun dired-git-log--files ()
-  "Return list of files visible in Dired buffer."
+  "Return list of file names in Dired buffer."
   (save-excursion
     (let (files)
       (goto-char 1)
@@ -161,6 +161,15 @@ are (see git-log PRETTY FORMATS for all):
           (delete-region (point) (line-end-position)))
         (dired-next-line 1)))))
 
+(defun dired-git-log--after-readin ()
+  "Dired-git-log hook called after a Dired buffer is modified."
+  (dired-git-log--get-log))
+
+(defun dired-git-log--before-readin ()
+  "Dired-git-log hook called before a Dired buffer is modified."
+  (when (bound-and-true-p dired-git-log-mode)
+    (dired-git-log--remove-logs)))
+
 (defun dired-git-log--revert-buffer (&rest _r)
   "Recalculate git info after buffer is reverted."
   (when (bound-and-true-p dired-git-log-mode)
@@ -189,6 +198,8 @@ LIMIT as required by font-lock hook."
     (setq dired-git-log--restore-no-details nil)
     (dired-hide-details-mode -1))
   (advice-remove 'dired-revert #'dired-git-log--revert-buffer)
+  (remove-hook 'dired-before-readin-hook #'dired-git-log--before-readin t)
+  (remove-hook 'dired-after-readin-hook #'dired-git-log--after-readin t)
   (setq font-lock-keywords
         (remove '(dired-git-log--fontify-git-log) font-lock-keywords)))
 
@@ -205,10 +216,12 @@ LIMIT as required by font-lock hook."
      (t
       (add-to-list 'font-lock-keywords '(dired-git-log--fontify-git-log) t)
       (advice-add 'dired-revert :after #'dired-git-log--revert-buffer)
+      (add-hook 'dired-before-readin-hook #'dired-git-log--before-readin nil t)
+      (add-hook 'dired-after-readin-hook #'dired-git-log--after-readin nil t)
       (when dired-git-log-auto-hide-details-p
-        (unless dired-hide-details-mode
+        (unless (bound-and-true-p dired-hide-details-mode)
           (setq dired-git-log--restore-no-details t)
-          (dired-hide-details-mode 1)))
+          (dired-hide-details-mode)))
       (dired-git-log--get-log)))))
 
 (provide 'dired-git-log)
