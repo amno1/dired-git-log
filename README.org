@@ -7,7 +7,7 @@ Display git information inside a dired buffer:
 
 [[./images/screenshot.png]]
 
-This started as a fork of Clemera's [[dired-git-info][https://github.com/clemera/dired-git-log]],
+This started as a fork of Clemera's [[dired-git-info][https://github.com/clemera/dired-git-info]],
 because I needed a version without overlayes, that works with my
 dired-auto-readme and mode dired-hacks. It is now totally reworked to use text
 properties as well as how it works internally. I would also like to
