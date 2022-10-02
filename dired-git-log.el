@@ -29,7 +29,10 @@
 ;;
 ;;; Code:
 
-(require 'dired)
+(eval-and-compile
+  (require 'dired)
+  (require 'dired-x)
+  (require 'dired-aux))
 
 (defgroup dired-git-log nil
   "Show git info in Dired."
@@ -195,19 +198,18 @@ LIMIT as required by font-lock hook."
   :lighter " dgl"
   (unless (derived-mode-p 'dired-mode)
     (user-error "Not in a Dired buffer"))
-  (unless (locate-dominating-file "." ".git")
-    (user-error "Not inside a git repository"))
-  (cond
-   ((not dired-git-log-mode)
-    (dired-git-log--cleanup))
-   (t
-    (add-to-list 'font-lock-keywords '(dired-git-log--fontify-git-log) t)
-    (advice-add 'dired-revert :after #'dired-git-log--revert-buffer)
-    (when dired-git-log-auto-hide-details-p
-      (unless dired-hide-details-mode
-        (setq dired-git-log--restore-no-details t)
-        (dired-hide-details-mode 1)))
-    (dired-git-log--get-log))))
+  (if (locate-dominating-file "." ".git")    
+    (cond
+     ((not dired-git-log-mode)
+      (dired-git-log--cleanup))
+     (t
+      (add-to-list 'font-lock-keywords '(dired-git-log--fontify-git-log) t)
+      (advice-add 'dired-revert :after #'dired-git-log--revert-buffer)
+      (when dired-git-log-auto-hide-details-p
+        (unless dired-hide-details-mode
+          (setq dired-git-log--restore-no-details t)
+          (dired-hide-details-mode 1)))
+      (dired-git-log--get-log)))))
 
 (provide 'dired-git-log)
 ;;; dired-git-log.el ends here
