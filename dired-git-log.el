@@ -180,7 +180,7 @@ are (see git-log PRETTY FORMATS for all):
 
 LIMIT as required by font-lock hook."
   (save-excursion
-    (goto-char 1)
+    (goto-char (point-min))
     (while (< (point) limit)
       (when (dired-file-name-at-point)
         (dired-move-to-end-of-filename)
@@ -191,6 +191,15 @@ LIMIT as required by font-lock hook."
                  'face 'dired-git-log-commit-message-face))))
       (dired-next-line 1))))
 
+(defun dired-git-log--after-mode ()
+  (when dired-git-log-auto-hide-details-p
+    (unless (bound-and-true-p dired-hide-details-mode)
+      (setq dired-git-log--restore-no-details t)
+      (dired-hide-details-mode))))
+
+(defun dired-git-log--on-first-change ()
+  (dired-git-log--fontify-git-log (point-max)))
+
 (defun dired-git-log--cleanup ()
   "Remove commit messages."
   (dired-git-log--remove-logs)
@@ -200,6 +209,8 @@ LIMIT as required by font-lock hook."
   (advice-remove 'dired-revert #'dired-git-log--revert-buffer)
   (remove-hook 'dired-before-readin-hook #'dired-git-log--before-readin t)
   (remove-hook 'dired-after-readin-hook #'dired-git-log--after-readin t)
+  (remove-hook 'after-change-major-mode-hook #'dired-git-log--after-mode t)
+  (remove-hook 'first-change-hook #'dired-git-log--on-first-change t)
   (setq font-lock-keywords
         (remove '(dired-git-log--fontify-git-log) font-lock-keywords)))
 
@@ -210,19 +221,17 @@ LIMIT as required by font-lock hook."
   (unless (derived-mode-p 'dired-mode)
     (user-error "Not in a Dired buffer"))
   (if (locate-dominating-file "." ".git")    
-    (cond
-     ((not dired-git-log-mode)
-      (dired-git-log--cleanup))
-     (t
-      (add-to-list 'font-lock-keywords '(dired-git-log--fontify-git-log) t)
-      (advice-add 'dired-revert :after #'dired-git-log--revert-buffer)
-      (add-hook 'dired-before-readin-hook #'dired-git-log--before-readin nil t)
-      (add-hook 'dired-after-readin-hook #'dired-git-log--after-readin nil t)
-      (when dired-git-log-auto-hide-details-p
-        (unless (bound-and-true-p dired-hide-details-mode)
-          (setq dired-git-log--restore-no-details t)
-          (dired-hide-details-mode)))
-      (dired-git-log--get-log)))))
+      (cond
+       ((not dired-git-log-mode)
+        (dired-git-log--cleanup))
+       (t
+        (font-lock-add-keywords nil '(dired-git-log--fontify-git-log))
+        (advice-add 'dired-revert :after #'dired-git-log--revert-buffer)
+        (add-hook 'dired-before-readin-hook #'dired-git-log--before-readin nil t)
+        (add-hook 'dired-after-readin-hook #'dired-git-log--after-readin nil t)
+        (add-hook 'after-change-major-mode-hook #'dired-git-log--after-mode nil t)
+        (add-hook 'first-change-hook #'dired-git-log--on-first-change nil t)
+        (dired-git-log--get-log)))))
 
 (provide 'dired-git-log)
 ;;; dired-git-log.el ends here
